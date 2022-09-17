@@ -7,5 +7,6 @@ export function actionButtons() {
     Markup.button.callback('Put off lesson', 'put_off_lesson'),
     Markup.button.callback('Individual lesson', 'individual_lesson'),
     Markup.button.callback('Group lesson', 'group_lesson'),
+    Markup.button.callback('Get lesson prices', 'lesson_prices'),
   ]);
 }

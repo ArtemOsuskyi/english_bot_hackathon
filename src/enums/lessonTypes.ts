@@ -1,5 +1,4 @@
-export enum LessonTypes {
-  Solo = 'Solo',
-  Group = 'Group',
-  Combined = 'Combined',
+export enum TypeOfLessons {
+  SOLO = 'solo',
+  GROUP = 'group',
 }
