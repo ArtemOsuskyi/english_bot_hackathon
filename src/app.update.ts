@@ -1,7 +1,6 @@
 import { Hears, InjectBot, Start, Update } from 'nestjs-telegraf';
 import { Context, Telegraf } from 'telegraf';
 
-import { AppService } from './app.service';
 import { actionButtons } from './app.buttons';
 
 @Update()
@@ -10,7 +9,7 @@ export class AppUpdate {
 
   @Start()
   async startCommend(ctx: Context) {
-    await ctx.reply('Hi! ' + ctx.message.from.id);
+    await ctx.reply('Hi! ' + ctx.message.from);
     await ctx.reply('What do you want to do?', actionButtons());
   }
 
