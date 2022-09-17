@@ -1,22 +1,19 @@
-import { Module }          from '@nestjs/common';
-import { AppService }      from './app.service';
-import { TelegrafModule }  from 'nestjs-telegraf';
-import { config }          from 'dotenv';
-import { AppUpdate }       from './app.update';
-import { TypeOrmModule }   from '@nestjs/typeorm';
-import { TypeOrmExModule } from './db/typeorm_ex.module';
+import { Module } from '@nestjs/common';
+import * as LocalSession from 'telegraf-session-local';
+import { AppService } from './app.service';
+import { TelegrafModule } from 'nestjs-telegraf';
+import { AppUpdate } from './app.update';
+import { UsersModule } from './users/users.module';
 
-config();
+const sessions = new LocalSession({ database: 'session_db.json' });
 
 @Module({
   imports: [
     TelegrafModule.forRoot({
-      token: process.env.TELEGRAM_TOKEN,
-      middlewares: [],
+      token: '5454765552:AAHTly3uWBheBAv7ta2lLbWSi-NZomTi-3A',
+      middlewares: [sessions.middleware()],
     }),
-    TypeOrmModule.forRootAsync({
-
-    })
+    UsersModule,
   ],
   providers: [AppService, AppUpdate],
 })
