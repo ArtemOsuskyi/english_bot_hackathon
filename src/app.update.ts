@@ -1,12 +1,30 @@
-import { Command, Hears, InjectBot, Start, Update } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
+import { GroupService } from './group/group.service';
+import {
+  Command,
+  Hears,
+  InjectBot,
+  Message,
+  On,
+  Start,
+  Update,
+  Ctx,
+} from 'nestjs-telegraf';
+import { Context as TelegraphContext, Telegraf } from 'telegraf';
 
 import { TypeOfLessons } from './enums/lessonTypes';
 import { BotCommands } from './enums/botCommants';
-import { levelOfEnglishButtons, prefferedLessonsButton } from './app.buttons';
+import {
+  actionButtons,
+  levelOfEnglishButtons,
+  prefferedLessonsButton,
+} from './app.buttons';
 import { UsersService } from './users/users.service';
 import { SkillLevel } from './enums/skillLevel.enum';
 import { LessonPrices } from './enums/prices';
+
+export function pregMatch(regex, str) {
+  return new RegExp(regex).test(str);
+}
 
 const getLessonOptions = (type: TypeOfLessons, showPrice?: boolean) => {
   const options = [
@@ -25,11 +43,18 @@ const getLessonOptions = (type: TypeOfLessons, showPrice?: boolean) => {
   return options.map((o) => o).join('\n');
 };
 
+interface Context extends TelegraphContext {
+  session: {
+    type?: 'day' | 'time' | null | 'choose time' | 'choose day';
+  };
+}
+
 @Update()
 export class AppUpdate {
   constructor(
     @InjectBot() private readonly bot: Telegraf<Context>,
     private readonly userService: UsersService,
+    private readonly groupsService: GroupService,
   ) {}
 
   @Start()
@@ -67,6 +92,24 @@ export class AppUpdate {
     return 'Put off lesson';
   }
 
+  @Hears('Get groups info')
+  async groupsInfo(ctx: Context) {
+    const result = await this.groupsService.getAll();
+    if (!result) {
+      await ctx.reply('Unable to get groups info');
+      return;
+    }
+    if (result && !result.length) {
+      await ctx.reply('No groups found');
+      return;
+    }
+
+    /* result.forEach(r => {
+      r.
+      await ctx.reply(``)
+    }) */
+  }
+
   @Hears('Get lesson prices')
   async getPrices(ctx: Context) {
     const prices = LessonPrices;
@@ -82,6 +125,53 @@ export class AppUpdate {
       return;
     }
     await ctx.reply('Unable to get lesson prices');
+  }
+
+  @On('text')
+  async chooseOption(@Message('text') message: string, @Ctx() ctx: Context) {
+    if (!ctx.session.type) return;
+
+    if (ctx.session.type === 'choose day') {
+      // replayse log with DB request
+      console.log(message);
+      ctx.session.type = null;
+    }
+
+    if (ctx.session.type === 'choose time') {
+      // replayse log with DB request
+      console.log(message);
+      ctx.session.type = null;
+    }
+
+    if (ctx.session?.type === 'day') {
+      const regexDay = /([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/gm;
+      const currentDate = new Date();
+      const currentDateToString =
+        currentDate.getFullYear() +
+        '-' +
+        (+currentDate.getMonth() + 1) +
+        '-' +
+        currentDate.getDate();
+      const currentDateServerFormat = Date.parse(currentDateToString);
+
+      if (
+        pregMatch(regexDay, message) &&
+        !isNaN(Date.parse(message)) &&
+        Date.parse(message) >= currentDateServerFormat
+      ) {
+        await ctx.reply(
+          `Notification had been sending!\n${ctx.from.first_name.toUpperCase()} (${
+            ctx.from.id
+          }) will absent ${message}`,
+        );
+        ctx.session.type = null;
+        return;
+      } else {
+        await ctx.reply(
+          `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
+        );
+      }
+    }
   }
 
   @Hears('Individual lesson')
@@ -122,14 +212,14 @@ export class AppUpdate {
 
   @Command(BotCommands.CHOOSE_DAY)
   async chooseDayCommand(ctx: Context) {
-    // hears function to choose day
-    return 'choose_day';
+    await ctx.reply('Type convenient days to learn (monday, wednesday):');
+    ctx.session.type = 'choose day';
   }
 
   @Command(BotCommands.CHOOSE_TIME)
   async chooseTimeCommand(ctx: Context) {
-    // hears function to choose time
-    return 'choose_time';
+    await ctx.reply('Type convenient time to learn (11:00, 14:00):');
+    ctx.session.type = 'choose time';
   }
 
   @Command(BotCommands.GET_GROUP_PRICE)
@@ -183,5 +273,17 @@ export class AppUpdate {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return ctx.message.text;
+  }
+
+  @Hears('Notify about absence')
+  async notifyAboutAbsence(ctx: Context) {
+    await ctx.reply('Write day when you will absent (format: YYYY-MM-DD): ');
+    ctx.session.type = 'day';
+  }
+
+  @Hears('Restart')
+  async startCommand2(ctx: Context) {
+    await ctx.reply('Hi! ' + ctx.message.from.first_name.toUpperCase());
+    await ctx.reply('What do you want to do?', actionButtons());
   }
 }
