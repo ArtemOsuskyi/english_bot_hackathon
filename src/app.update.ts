@@ -143,12 +143,12 @@ export class AppUpdate {
     const prices = LessonPrices;
     if (prices.GROUP) {
       await ctx.reply(
-        `Group lesson price - ${prices.GROUP} грн\nChoose group lesson: ${BotCommands.GROUP}`,
+        `Group lesson price - ${prices.GROUP} UAH\nChoose group lesson: ${BotCommands.GROUP}`,
       );
     }
     if (prices.SOLO) {
       await ctx.reply(
-        `Individual lesson price - ${prices.SOLO} грн\nChoose individual lesson: ${BotCommands.INDIVIDUAL}`,
+        `Individual lesson price - ${prices.SOLO} UAH\nChoose individual lesson: ${BotCommands.INDIVIDUAL}`,
       );
       return;
     }
@@ -210,7 +210,7 @@ export class AppUpdate {
       await ctx.reply("Can't get price right now, try again later");
       return;
     }
-    await ctx.reply(`The group lesson price is ${price} грн`);
+    await ctx.reply(`The group lesson price is ${price} UAH`);
   }
 
   @Command(BotCommands.GET_INDIVIDUAL_PRICE)
@@ -220,7 +220,7 @@ export class AppUpdate {
       await ctx.reply("Can't get price right now, try again later");
       return;
     }
-    await ctx.reply(`The individual lesson price is ${price} грн`);
+    await ctx.reply(`The individual lesson price is ${price} UAH`);
   }
 
   @Hears(Object.values(SkillLevel))
