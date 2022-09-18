@@ -5,6 +5,8 @@ import { TypeOfLessons } from './enums/lessonTypes';
 import { BotCommands } from './enums/botCommants';
 import { levelOfEnglishButtons, prefferedLessonsButton } from './app.buttons';
 import { UsersService } from './users/users.service';
+import { SkillLevel } from './enums/skillLevel.enum';
+import { LessonPrices } from './enums/prices';
 
 const getLessonOptions = (type: TypeOfLessons, showPrice?: boolean) => {
   const options = [
@@ -67,7 +69,7 @@ export class AppUpdate {
 
   @Hears('Get lesson prices')
   async getPrices(ctx: Context) {
-    const prices = await this.appService.getAllPrices();
+    const prices = LessonPrices;
     if (prices.GROUP) {
       await ctx.reply(
         `Group lesson price - ${prices.GROUP} грн\nChoose group lesson: ${BotCommands.GROUP}`,
@@ -84,7 +86,10 @@ export class AppUpdate {
 
   @Hears('Individual lesson')
   async individualLesson(ctx: Context, showPrice?: boolean) {
-    const result = await this.appService.chooseLessonType(TypeOfLessons.SOLO);
+    const result = await this.userService.update(ctx.message.from.id, {
+      preferredLessons: TypeOfLessons.SOLO,
+    });
+
     if (!result) {
       ctx.reply('Some error occured');
     }
@@ -94,7 +99,10 @@ export class AppUpdate {
 
   @Hears('Group lesson')
   async groupLesson(ctx: Context, showPrice?: boolean) {
-    const result = await this.appService.chooseLessonType(TypeOfLessons.GROUP);
+    const result = await this.userService.update(ctx.message.from.id, {
+      preferredLessons: TypeOfLessons.GROUP,
+    });
+
     if (!result) {
       ctx.reply('Some error occured');
     }
@@ -126,7 +134,7 @@ export class AppUpdate {
 
   @Command(BotCommands.GET_GROUP_PRICE)
   async getGroupPriceCommand(ctx: Context) {
-    const price = this.appService.getLessonPrice(TypeOfLessons.GROUP);
+    const price = LessonPrices.GROUP;
     if (!price) {
       await ctx.reply("Can't get price right now, try again later");
       return;
@@ -136,12 +144,14 @@ export class AppUpdate {
 
   @Command(BotCommands.GET_INDIVIDUAL_PRICE)
   async getIndividualPriceCommand(ctx: Context) {
-    const price = this.appService.getLessonPrice(TypeOfLessons.SOLO);
+    const price = LessonPrices.SOLO;
     if (!price) {
       await ctx.reply("Can't get price right now, try again later");
       return;
     }
     await ctx.reply(`The individual lesson price is ${price} грн`);
+  }
+
   @Hears(Object.values(SkillLevel))
   async getLevelOfEnglish(ctx: Context) {
     const languageSkill = await this.getMessage(ctx);
