@@ -22,6 +22,7 @@ import { TypeOfLessons } from './enums/typeOfLessons.enum';
 import { GroupService } from './group/group.service';
 import { IndividualService } from './individual/individual.service';
 import { LessonPrices } from './enums/prices';
+import { makeLogger } from 'ts-loader/dist/logger';
 
 export function pregMatch(regex, str) {
   return new RegExp(regex).test(str);
@@ -46,7 +47,7 @@ const getLessonOptions = (type: TypeOfLessons, showPrice?: boolean) => {
 
 interface Context extends TelegraphContext {
   session: {
-    type?: 'day' | 'time' | null | 'choose time' | 'choose day';
+    type?: 'day' | 'time' | null | 'choose time' | 'choose day' | 'enter name';
   };
 }
 
@@ -70,6 +71,7 @@ export class AppUpdate {
         `I don't see you in the database, so I need some information to provide you with the services you need.`,
       );
       await ctx.reply('Please enter your full name (first & last name).');
+      ctx.session.type = 'enter name';
     }
 
     if (user) {
@@ -85,6 +87,9 @@ export class AppUpdate {
       const group = await this.groupService.getOneById(user.group.id);
       return `Your group info:
       Skill level: ${group.language_skill}
+      Day and time: ${group.daysAndTimes.map((dayAndTime) => {
+        return `${dayAndTime.day} - ${dayAndTime.time}`;
+      })}
       Teacher: ${group.teacher.firstName} ${group.teacher.lastName}
       Teacher phone: ${group.teacher.phone}
       Students: 
@@ -104,18 +109,18 @@ export class AppUpdate {
       const individual = await this.individualService.getOneById(
         user.individual.id,
       );
-      return `Your group info:
+
+      return `Your individual info:
       Skill level: ${individual.skill_level}
       Teacher: ${individual.teacher?.firstName} ${individual.teacher?.lastName}
-      Teacher phone: ${individual.teacher.phone}`;
+      Teacher phone: ${individual.teacher.phone}
+      Day and time: ${individual.daysAndTimes?.map((dayAndTime) => {
+        return `${dayAndTime.day} - ${dayAndTime.time}`;
+      })}
+      `;
     } else {
       return `You don't have individual lessons`;
     }
-  }
-
-  @Hears('Put off lesson')
-  async putOffLesson() {
-    return 'Put off lesson';
   }
 
   @Hears('Get groups info')
@@ -222,7 +227,7 @@ export class AppUpdate {
   }
 
   @Hears(Object.values(SkillLevel))
-  async getLevelOfEnglish(ctx: Context) {
+  async setLevelOfEnglish(ctx: Context) {
     const languageSkill = await this.getMessage(ctx);
 
     await this.userService.update(ctx.from.id, {
@@ -236,7 +241,7 @@ export class AppUpdate {
   }
 
   @Hears(Object.values(TypeOfLessons))
-  async getTypeOfLesson(ctx: Context) {
+  async setTypeOfLesson(ctx: Context) {
     const preferredLessons = await this.getMessage(ctx);
 
     await this.userService.update(ctx.from.id, {
@@ -245,76 +250,6 @@ export class AppUpdate {
 
     await ctx.reply('Ok');
     await ctx.reply('What do you want to do?', actionButtons());
-  }
-
-  @On('message')
-  async message(ctx: Context) {
-    const message: string = await this.getMessage(ctx);
-
-    const regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
-
-    if (regName.test(message)) {
-      await this.userService.create({
-        telegramId: ctx.from.id,
-        firstName: message.slice(0, message.indexOf(' ')),
-        lastName: message.slice(message.indexOf(' ') + 1),
-      });
-
-      await ctx.reply(
-        'What is your level of English?',
-        levelOfEnglishButtons(),
-      );
-    } else {
-      if (!ctx.session.type) return;
-
-      if (ctx.session.type === 'choose day') {
-        // replayse log with DB request
-        console.log(message);
-        ctx.session.type = null;
-      }
-
-      if (ctx.session.type === 'choose time') {
-        // replayse log with DB request
-        console.log(message);
-        ctx.session.type = null;
-      }
-
-      if (ctx.session?.type === 'day') {
-        const regexDay = /([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/gm;
-        const currentDate = new Date();
-        const currentDateToString =
-          currentDate.getFullYear() +
-          '-' +
-          (+currentDate.getMonth() + 1) +
-          '-' +
-          currentDate.getDate();
-        const currentDateServerFormat = Date.parse(currentDateToString);
-
-        if (
-          pregMatch(regexDay, message) &&
-          !isNaN(Date.parse(message)) &&
-          Date.parse(message) >= currentDateServerFormat
-        ) {
-          await ctx.reply(
-            `Notification had been sending!\n${ctx.from.first_name.toUpperCase()} (${
-              ctx.from.id
-            }) will absent ${message}`,
-          );
-          ctx.session.type = null;
-          return;
-        } else {
-          await ctx.reply(
-            `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
-          );
-        }
-      }
-    }
-  }
-
-  private async getMessage(ctx: Context) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return ctx.message.text;
   }
 
   @Hears('Notify about absence')
@@ -327,5 +262,76 @@ export class AppUpdate {
   async startCommand2(ctx: Context) {
     await ctx.reply('Hi! ' + ctx.message.from.first_name.toUpperCase());
     await ctx.reply('What do you want to do?', actionButtons());
+  }
+
+  @On('message')
+  async message(ctx: Context) {
+    const message: string = await this.getMessage(ctx);
+
+    if (ctx.session.type === 'choose day') {
+      // replace log with DB request
+      console.log(message);
+      ctx.session.type = null;
+    }
+
+    if (ctx.session.type === 'choose time') {
+      // replayse log with DB request
+      console.log(message);
+      ctx.session.type = null;
+    }
+
+    if (ctx.session?.type === 'day') {
+      const regexDay = /([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/gm;
+      const currentDate = new Date();
+      const currentDateToString =
+        currentDate.getFullYear() +
+        '-' +
+        (+currentDate.getMonth() + 1) +
+        '-' +
+        currentDate.getDate();
+      const currentDateServerFormat = Date.parse(currentDateToString);
+
+      if (
+        pregMatch(regexDay, message) &&
+        !isNaN(Date.parse(message)) &&
+        Date.parse(message) >= currentDateServerFormat
+      ) {
+        await ctx.reply(
+          `Notification had been sending!\n${ctx.from.first_name.toUpperCase()} (${
+            ctx.from.id
+          }) will absent ${message}`,
+        );
+        ctx.session.type = null;
+        return;
+      }
+      // else {
+      //   await ctx.reply(
+      //     `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
+      //   );
+      // }
+    }
+
+    const regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
+
+    if (ctx.session.type === 'enter name' && regName.test(message)) {
+      await this.userService.create({
+        telegramId: ctx.from.id,
+        firstName: message.slice(0, message.indexOf(' ')),
+        lastName: message.slice(message.indexOf(' ') + 1),
+      });
+
+      await ctx.reply(
+        'What is your level of English?',
+        levelOfEnglishButtons(),
+      );
+    } else {
+      if (!ctx.session.type) return;
+    }
+  }
+
+  private async getMessage(ctx: Context) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return ctx.message.text;
   }
 }

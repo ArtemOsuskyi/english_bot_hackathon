@@ -29,6 +29,6 @@ export class Group {
   })
   teacher: Teacher;
 
-  @ManyToOne(() => DaysAndTimes, (daysAndTimes) => daysAndTimes.group)
+  @OneToMany(() => DaysAndTimes, (daysAndTimes) => daysAndTimes.group)
   daysAndTimes: DaysAndTimes[];
 }

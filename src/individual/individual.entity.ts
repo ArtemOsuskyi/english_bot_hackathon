@@ -3,6 +3,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -28,6 +29,6 @@ export class Individual {
   @Column({ name: 'skill_level', type: 'enum', enum: SkillLevel })
   skill_level: SkillLevel;
 
-  @ManyToOne(() => DaysAndTimes, (daysAndTimes) => daysAndTimes.individual)
+  @OneToMany(() => DaysAndTimes, (daysAndTimes) => daysAndTimes.individual)
   daysAndTimes: DaysAndTimes[];
 }

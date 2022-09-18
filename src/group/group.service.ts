@@ -18,7 +18,7 @@ export class GroupService {
   async getOneById(id: number) {
     return this.groupRepository.findOne({
       where: { id },
-      relations: ['students', 'teacher'],
+      relations: ['students', 'teacher', 'daysAndTimes'],
     });
   }
 

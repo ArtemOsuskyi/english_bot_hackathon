@@ -18,7 +18,7 @@ export class IndividualService {
   async getOneById(id: number) {
     return this.individualRepository.findOne({
       where: { id },
-      relations: ['student', 'teacher'],
+      relations: ['student', 'teacher', 'daysAndTimes'],
     });
   }
 
