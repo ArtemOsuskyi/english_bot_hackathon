@@ -13,7 +13,7 @@ const sessions = new LocalSession({ database: 'session_db.json' });
 @Module({
   imports: [
     TelegrafModule.forRoot({
-      token: '5454765552:AAHTly3uWBheBAv7ta2lLbWSi-NZomTi-3A',
+      token: '5442639512:AAHM4buCpzKQWZakzqWEA-irPRjUvhc0-RE',
       middlewares: [sessions.middleware()],
     }),
     UsersModule,

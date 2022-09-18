@@ -13,8 +13,10 @@ import { Context as TelegraphContext, Telegraf } from 'telegraf';
 import { BotCommands } from './enums/botCommants';
 import {
   actionButtons,
+  daysButtons,
   levelOfEnglishButtons,
   prefferedLessonsButton,
+  timeButtons,
 } from './app.buttons';
 import { UsersService } from './users/users.service';
 import { SkillLevel } from './enums/skillLevel.enum';
@@ -196,13 +198,13 @@ export class AppUpdate {
 
   @Command(BotCommands.CHOOSE_DAY)
   async chooseDayCommand(ctx: Context) {
-    await ctx.reply('Type convenient days to learn (monday, wednesday):');
+    await ctx.reply('Choose day:', daysButtons());
     ctx.session.type = 'choose day';
   }
 
   @Command(BotCommands.CHOOSE_TIME)
   async chooseTimeCommand(ctx: Context) {
-    await ctx.reply('Type convenient time to learn (11:00, 14:00):');
+    await ctx.reply('Choose time:', timeButtons());
     ctx.session.type = 'choose time';
   }
 
@@ -270,13 +272,13 @@ export class AppUpdate {
 
     if (ctx.session.type === 'choose day') {
       // replace log with DB request
-      console.log(message);
+      ctx.reply(`you choose ${message}`, actionButtons());
       ctx.session.type = null;
     }
 
     if (ctx.session.type === 'choose time') {
-      // replayse log with DB request
-      console.log(message);
+      // replace log with DB request
+      ctx.reply(`you choose ${message}`, actionButtons());
       ctx.session.type = null;
     }
 
