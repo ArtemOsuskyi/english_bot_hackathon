@@ -153,53 +153,6 @@ export class AppUpdate {
     await ctx.reply('Unable to get lesson prices');
   }
 
-  @On('text')
-  async chooseOption(@Message('text') message: string, @Ctx() ctx: Context) {
-    if (!ctx.session.type) return;
-
-    if (ctx.session.type === 'choose day') {
-      // replayse log with DB request
-      console.log(message);
-      ctx.session.type = null;
-    }
-
-    if (ctx.session.type === 'choose time') {
-      // replayse log with DB request
-      console.log(message);
-      ctx.session.type = null;
-    }
-
-    if (ctx.session?.type === 'day') {
-      const regexDay = /([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/gm;
-      const currentDate = new Date();
-      const currentDateToString =
-        currentDate.getFullYear() +
-        '-' +
-        (+currentDate.getMonth() + 1) +
-        '-' +
-        currentDate.getDate();
-      const currentDateServerFormat = Date.parse(currentDateToString);
-
-      if (
-        pregMatch(regexDay, message) &&
-        !isNaN(Date.parse(message)) &&
-        Date.parse(message) >= currentDateServerFormat
-      ) {
-        await ctx.reply(
-          `Notification had been sending!\n${ctx.from.first_name.toUpperCase()} (${
-            ctx.from.id
-          }) will absent ${message}`,
-        );
-        ctx.session.type = null;
-        return;
-      } else {
-        await ctx.reply(
-          `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
-        );
-      }
-    }
-  }
-
   @Hears('Individual lesson')
   async individualLesson(ctx: Context, showPrice?: boolean) {
     const result = await this.userService.update(ctx.message.from.id, {
@@ -312,7 +265,49 @@ export class AppUpdate {
         levelOfEnglishButtons(),
       );
     } else {
-      return `Please, don't send unnecessary messages!`;
+      if (!ctx.session.type) return;
+
+      if (ctx.session.type === 'choose day') {
+        // replayse log with DB request
+        console.log(message);
+        ctx.session.type = null;
+      }
+
+      if (ctx.session.type === 'choose time') {
+        // replayse log with DB request
+        console.log(message);
+        ctx.session.type = null;
+      }
+
+      if (ctx.session?.type === 'day') {
+        const regexDay = /([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/gm;
+        const currentDate = new Date();
+        const currentDateToString =
+          currentDate.getFullYear() +
+          '-' +
+          (+currentDate.getMonth() + 1) +
+          '-' +
+          currentDate.getDate();
+        const currentDateServerFormat = Date.parse(currentDateToString);
+
+        if (
+          pregMatch(regexDay, message) &&
+          !isNaN(Date.parse(message)) &&
+          Date.parse(message) >= currentDateServerFormat
+        ) {
+          await ctx.reply(
+            `Notification had been sending!\n${ctx.from.first_name.toUpperCase()} (${
+              ctx.from.id
+            }) will absent ${message}`,
+          );
+          ctx.session.type = null;
+          return;
+        } else {
+          await ctx.reply(
+            `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
+          );
+        }
+      }
     }
   }
 
