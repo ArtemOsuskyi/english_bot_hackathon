@@ -1,10 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { DeepPartial, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { SkillLevel } from '../enums/skillLevel.enum';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +18,7 @@ export class UsersService {
   async getOneByTelegramId(telegramId: number) {
     return this.userRepository.findOne({
       where: { telegramId },
-      relations: ['group'],
+      relations: ['group', 'individual'],
     });
   }
 

@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Group } from '../group/group.entity';
+import { Individual } from '../individual/individual.entity';
 
 @Entity({ name: 'teacher' })
 export class Teacher {
@@ -22,4 +23,9 @@ export class Teacher {
     nullable: true,
   })
   groups: Group[];
+
+  @OneToMany(() => Individual, (individual) => individual.teacher, {
+    nullable: true,
+  })
+  individual: Individual[];
 }

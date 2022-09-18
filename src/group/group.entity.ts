@@ -9,6 +9,7 @@ import {
 import { SkillLevel } from '../enums/skillLevel.enum';
 import { User } from '../users/user.entity';
 import { Teacher } from '../teachers/teachers.entity';
+import { DaysAndTimes } from '../daysAndTimes/days-and-times.entity';
 
 @Entity({ name: 'group' })
 export class Group {
@@ -27,4 +28,7 @@ export class Group {
     nullable: true,
   })
   teacher: Teacher;
+
+  @ManyToOne(() => DaysAndTimes, (daysAndTimes) => daysAndTimes.group)
+  daysAndTimes: DaysAndTimes[];
 }

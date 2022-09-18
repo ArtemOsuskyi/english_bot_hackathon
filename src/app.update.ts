@@ -47,7 +47,8 @@ export class AppUpdate {
       const group = await this.groupService.getOneById(user.group.id);
       return `Your group info:
       Skill level: ${group.language_skill}
-      Teacher: ${group.teacher?.firstName} ${group.teacher?.lastName}
+      Teacher: ${group.teacher.firstName} ${group.teacher.lastName}
+      Teacher phone: ${group.teacher.phone}
       Students: 
          ${group.students.map(
            (student) => ' ' + student.firstName + ' ' + student.lastName,
