@@ -293,12 +293,11 @@ export class AppUpdate {
         );
         ctx.session.type = null;
         return;
+      } else {
+        await ctx.reply(
+          `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
+        );
       }
-      // else {
-      //   await ctx.reply(
-      //     `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
-      //   );
-      // }
     }
 
     const regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
