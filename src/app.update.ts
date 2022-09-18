@@ -4,6 +4,7 @@ import { BotContext } from './model/context.model';
 
 import { AppService } from './app.service';
 import { actionButtons } from './app.buttons';
+import { pregMatch } from "./utils/utils";
 
 @Update()
 export class AppUpdate {
@@ -35,7 +36,7 @@ export class AppUpdate {
 
   @Hears('Notify about absence')
   async notifyAboutAbsence(ctx: BotContext) {
-    await ctx.reply('Write day when you will absent: ');
+    await ctx.reply('Write day when you will absent (format: YYYY-MM-DD): ');
     ctx.session.type = 'day';
   }
 
@@ -50,10 +51,18 @@ export class AppUpdate {
     if (!ctx.session?.type) return;
 
     if (ctx.session?.type === 'day') {
-      await ctx.reply(`Notification had been sending!\n
-      ${ctx.from.first_name.toUpperCase()} (${ctx.from.id}) will absent ${message}`);
-      ctx.session.type = null;
-      return;
+      const regexDay = /([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/gm;
+      const currentDate = new Date();
+      const currentDateToString = currentDate.getFullYear() + '-' + (+currentDate.getMonth() + 1) + '-' + currentDate.getDate();
+      const currentDateServerFormat = Date.parse(currentDateToString);
+
+      if ( pregMatch(regexDay, message) && !isNaN(Date.parse(message)) && Date.parse(message) >= currentDateServerFormat) {
+        await ctx.reply(`Notification had been sending!\n${ctx.from.first_name.toUpperCase()} (${ctx.from.id}) will absent ${message}`);
+        ctx.session.type = null;
+        return;
+      } else {
+        await ctx.reply(`Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`);
+      }
     }
   }
 }
