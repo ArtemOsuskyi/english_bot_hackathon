@@ -4,8 +4,11 @@ import { TypeOfLessons } from './enums/typeOfLessons.enum';
 
 export function actionButtons() {
   return Markup.keyboard([
-    Markup.button.callback('List of my lessons', 'lessons_list'),
-    Markup.button.callback('Skip lesson', 'skip_lesson'),
+    Markup.button.callback('Info about my group', 'group_info'),
+    Markup.button.callback(
+      'Info about my individual lessons',
+      'individual_info',
+    ),
     Markup.button.callback('Put off lesson', 'put_off_lesson'),
   ]);
 }

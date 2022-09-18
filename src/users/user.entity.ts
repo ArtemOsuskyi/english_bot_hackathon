@@ -1,7 +1,14 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { SkillLevel } from '../enums/skillLevel.enum';
 import { TypeOfLessons } from '../enums/typeOfLessons.enum';
 import { Group } from '../group/group.entity';
+import { Individual } from '../individual/individual.entity';
 
 @Entity({ name: 'user' })
 export class User {
@@ -11,10 +18,18 @@ export class User {
   @Column({ name: 'telegram_id', type: 'int', nullable: false })
   telegramId: number;
 
-  @Column({ name: 'telegram_username', type: 'varchar', nullable: false })
-  telegramUsername: string;
+  @Column()
+  firstName!: string;
 
-  @Column({ name: 'language_skill', type: 'enum', enum: SkillLevel })
+  @Column()
+  lastName!: string;
+
+  @Column({
+    name: 'language_skill',
+    type: 'enum',
+    enum: SkillLevel,
+    nullable: true,
+  })
   languageSkill: SkillLevel;
 
   @Column({
@@ -29,4 +44,9 @@ export class User {
     nullable: true,
   })
   group: Group;
+
+  @OneToOne(() => Individual, (individual) => individual.student, {
+    nullable: true,
+  })
+  individual: Individual;
 }

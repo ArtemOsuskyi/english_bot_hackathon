@@ -4,6 +4,9 @@ import { AppService } from './app.service';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { AppUpdate } from './app.update';
 import { UsersModule } from './users/users.module';
+import { GroupModule } from './group/group.module';
+import { TeacherModule } from './teachers/teacher.module';
+import { IndividualModule } from './individual/individual.module';
 
 const sessions = new LocalSession({ database: 'session_db.json' });
 
@@ -14,6 +17,9 @@ const sessions = new LocalSession({ database: 'session_db.json' });
       middlewares: [sessions.middleware()],
     }),
     UsersModule,
+    GroupModule,
+    TeacherModule,
+    IndividualModule,
   ],
   providers: [AppService, AppUpdate],
 })
