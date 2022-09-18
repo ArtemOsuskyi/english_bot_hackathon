@@ -1,13 +1,4 @@
-import {
-  Command,
-  Hears,
-  InjectBot,
-  Message,
-  On,
-  Start,
-  Update,
-  Ctx,
-} from 'nestjs-telegraf';
+import { Command, Hears, InjectBot, On, Start, Update } from 'nestjs-telegraf';
 import { Context as TelegraphContext, Telegraf } from 'telegraf';
 
 import { BotCommands } from './enums/botCommants';
@@ -24,7 +15,6 @@ import { TypeOfLessons } from './enums/typeOfLessons.enum';
 import { GroupService } from './group/group.service';
 import { IndividualService } from './individual/individual.service';
 import { LessonPrices } from './enums/prices';
-import { makeLogger } from 'ts-loader/dist/logger';
 
 export function pregMatch(regex, str) {
   return new RegExp(regex).test(str);
@@ -40,7 +30,7 @@ const getLessonOptions = (type: TypeOfLessons, showPrice?: boolean) => {
       'Get lesson price: \n' +
         (type === TypeOfLessons.SOLO
           ? BotCommands.GET_INDIVIDUAL_PRICE
-          : BotCommands.GET_INDIVIDUAL_PRICE),
+          : BotCommands.GET_GROUP_PRICE),
     );
   }
 
@@ -116,9 +106,9 @@ export class AppUpdate {
       Skill level: ${individual.skill_level}
       Teacher: ${individual.teacher?.firstName} ${individual.teacher?.lastName}
       Teacher phone: ${individual.teacher.phone}
-      Day and time: ${individual.daysAndTimes?.map((dayAndTime) => {
-        return `${dayAndTime.day} - ${dayAndTime.time}`;
-      })}
+      Day and time:${individual.daysAndTimes?.map(
+        (dayAndTime) => ` ${dayAndTime.day} - ${dayAndTime.time}`,
+      )}
       `;
     } else {
       return `You don't have individual lessons`;
@@ -305,12 +295,11 @@ export class AppUpdate {
         );
         ctx.session.type = null;
         return;
+      } else {
+        await ctx.reply(
+          `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
+        );
       }
-      // else {
-      //   await ctx.reply(
-      //     `Wrong date or date format.\nWrite day to next format: YYYY-MM-DD\nFor example: ${currentDateToString}`,
-      //   );
-      // }
     }
 
     const regName = /^[a-zA-Z]+ [a-zA-Z]+$/;
