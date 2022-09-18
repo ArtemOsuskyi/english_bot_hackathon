@@ -104,10 +104,13 @@ export class AppUpdate {
       return;
     }
 
-    /* result.forEach(r => {
-      r.
-      await ctx.reply(``)
-    }) */
+    result.forEach(async (r) => {
+      await ctx.reply(
+        `Date: $date\nLanguage skill: ${r.language_skill}\nTeacher: ${
+          r.teacher
+        }\nStudents: \n${r.students.map((s) => ` ${s.telegramUsername}\n`)}`,
+      );
+    });
   }
 
   @Hears('Get lesson prices')
