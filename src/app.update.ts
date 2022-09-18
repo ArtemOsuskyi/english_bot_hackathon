@@ -50,7 +50,12 @@ export class AppUpdate {
     private readonly userService: UsersService,
     private readonly groupService: GroupService,
     private readonly individualService: IndividualService,
-  ) {}
+  ) {
+    bot.telegram.setMyCommands([
+      { command: "start", description: "Start bot and authorized" },
+    ]);
+  }
+
 
   @Start()
   async startCommand(ctx: Context) {
