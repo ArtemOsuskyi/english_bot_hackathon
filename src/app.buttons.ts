@@ -10,6 +10,16 @@ export function actionButtons() {
       'individual_info',
     ),
     Markup.button.callback('Put off lesson', 'put_off_lesson'),
+    Markup.button.callback('Individual lesson', 'individual_lesson'),
+    Markup.button.callback('Group lesson', 'group_lesson'),
+    Markup.button.callback('Choose Day', 'choose_day'),
+    Markup.button.callback('Choose Time', 'choose_time'),
+    Markup.button.callback('Cancel lesson', 'cancel_lesson'),
+    Markup.button.callback('Get lesson prices', 'lesson_prices'),
+    Markup.button.callback('Get groups info', 'groups_info'),
+    Markup.button.callback('Notify about absence', 'absent_notify'),
+    Markup.button.callback('Restart', 'restart'),
+
   ]);
 }
 
