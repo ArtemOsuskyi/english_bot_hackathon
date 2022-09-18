@@ -1,4 +1,3 @@
-import { GroupService } from './group/group.service';
 import {
   Command,
   Hears,
@@ -10,15 +9,7 @@ import {
   Ctx,
 } from 'nestjs-telegraf';
 import { Context as TelegraphContext, Telegraf } from 'telegraf';
-import { Hears, InjectBot, On, Start, Update } from 'nestjs-telegraf';
-import { Context, Telegraf } from 'telegraf';
 
-import {
-  actionButtons,
-  levelOfEnglishButtons,
-  prefferedLessonsButton,
-} from './app.buttons';
-import { TypeOfLessons } from './enums/lessonTypes';
 import { BotCommands } from './enums/botCommants';
 import {
   actionButtons,
@@ -129,7 +120,7 @@ export class AppUpdate {
 
   @Hears('Get groups info')
   async groupsInfo(ctx: Context) {
-    const result = await this.groupsService.getAll();
+    const result = await this.groupService.getAll();
     if (!result) {
       await ctx.reply('Unable to get groups info');
       return;
